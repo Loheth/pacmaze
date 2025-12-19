@@ -201,7 +201,7 @@ Pacman.User = function (game, map) {
             return;
         }
 
-        ctx.fillStyle = "#FFFF00";
+        ctx.fillStyle = "#FFD700";
         ctx.beginPath();        
         ctx.moveTo(((position.x/10) * size) + half, 
                    ((position.y/10) * size) + half);
@@ -210,7 +210,7 @@ Pacman.User = function (game, map) {
                 ((position.y/10) * size) + half,
                 half, 0, Math.PI * 2 * amount, true); 
         
-        ctx.fill();    
+        ctx.fill();
     };
 
     function draw(ctx) { 
@@ -218,7 +218,7 @@ Pacman.User = function (game, map) {
         var s     = map.blockSize, 
             angle = calcAngle(direction, position);
 
-        ctx.fillStyle = "#FFFF00";
+        ctx.fillStyle = "#FFD700";
 
         ctx.beginPath();        
 
@@ -230,7 +230,7 @@ Pacman.User = function (game, map) {
                 s / 2, Math.PI * angle.start, 
                 Math.PI * angle.end, angle.direction); 
         
-        ctx.fill();    
+        ctx.fill();
     };
     
     initUser();

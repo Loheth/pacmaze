@@ -28,7 +28,7 @@ Pacman.Map = function (size) {
 
         var i, j, p, line;
         
-        ctx.strokeStyle = "#0000FF";
+        ctx.strokeStyle = "#808080";
         ctx.lineWidth   = 5;
         ctx.lineCap     = "round";
         
@@ -80,11 +80,11 @@ Pacman.Map = function (size) {
                 if (map[i][j] === Pacman.PILL) {
                     ctx.beginPath();
 
-                    ctx.fillStyle = "#000";
+                    ctx.fillStyle = "#1a1a1a";
 		            ctx.fillRect((j * blockSize), (i * blockSize), 
                                  blockSize, blockSize);
 
-                    ctx.fillStyle = "#FFF";
+                    ctx.fillStyle = "#50C878";
                     ctx.arc((j * blockSize) + blockSize / 2,
                             (i * blockSize) + blockSize / 2,
                             Math.abs(5 - (pillSize/3)), 
@@ -101,7 +101,7 @@ Pacman.Map = function (size) {
         
         var i, j, size = blockSize;
 
-        ctx.fillStyle = "#000";
+        ctx.fillStyle = "#1a1a1a";
 	    ctx.fillRect(0, 0, width * size, height * size);
 
         drawWall(ctx);
@@ -126,12 +126,12 @@ Pacman.Map = function (size) {
         if (layout === Pacman.EMPTY || layout === Pacman.BLOCK || 
             layout === Pacman.BISCUIT) {
             
-            ctx.fillStyle = "#000";
+            ctx.fillStyle = "#1a1a1a";
 		    ctx.fillRect((x * blockSize), (y * blockSize), 
                          blockSize, blockSize);
 
             if (layout === Pacman.BISCUIT) {
-                ctx.fillStyle = "#FFF";
+                ctx.fillStyle = "#FFD700";
 		        ctx.fillRect((x * blockSize) + (blockSize / 2.5), 
                              (y * blockSize) + (blockSize / 2.5), 
                              blockSize / 6, blockSize / 6);

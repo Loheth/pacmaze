@@ -22,18 +22,24 @@ var PACMAN = (function () {
     };
 
     function drawScore(text, position) {
-        ctx.fillStyle = "#FFFFFF";
-        ctx.font      = "12px BDCartoonShoutRegular";
-        ctx.fillText(text, 
-                     (position["new"]["x"] / 10) * map.blockSize, 
-                     ((position["new"]["y"] + 5) / 10) * map.blockSize);
+        ctx.fillStyle = "#FFD700";
+        ctx.font      = "bold 14px 'Press Start 2P', monospace";
+        ctx.strokeStyle = "#000000";
+        ctx.lineWidth = 2;
+        var x = (position["new"]["x"] / 10) * map.blockSize;
+        var y = ((position["new"]["y"] + 5) / 10) * map.blockSize;
+        ctx.strokeText(text, x, y);
+        ctx.fillText(text, x, y);
     }
     
     function dialog(text) {
-        ctx.fillStyle = "#FFFF00";
-        ctx.font      = "18px Calibri";
+        ctx.fillStyle = "#FFFFFF";
+        ctx.font      = "bold 16px 'Press Start 2P', monospace";
+        ctx.strokeStyle = "#000000";
+        ctx.lineWidth = 3;
         var width = ctx.measureText(text).width,
             x     = ((map.width * map.blockSize) - width) / 2;        
+        ctx.strokeText(text, x, (map.height * 10) + 8);
         ctx.fillText(text, x, (map.height * 10) + 8);
     }
 
@@ -103,34 +109,80 @@ var PACMAN = (function () {
     function drawFooter() {
         
         var topLeft  = (map.height * map.blockSize),
-            textBase = topLeft + 17;
+            textBase = topLeft + 17,
+            canvasWidth = map.width * map.blockSize;
         
-        ctx.fillStyle = "#000000";
-        ctx.fillRect(0, topLeft, (map.width * map.blockSize), 30);
+        // Minecraft-style footer background (dirt/stone texture)
+        ctx.fillStyle = "#8B7355";
+        ctx.fillRect(0, topLeft, canvasWidth, 30);
         
-        ctx.fillStyle = "#FFFF00";
+        // Add texture lines
+        ctx.strokeStyle = "#6B5B3D";
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(0, topLeft + 15);
+        ctx.lineTo(canvasWidth, topLeft + 15);
+        ctx.stroke();
+        
+        // Border
+        ctx.strokeStyle = "#2A2A2A";
+        ctx.lineWidth = 2;
+        ctx.strokeRect(0, topLeft, canvasWidth, 30);
 
-        for (var i = 0, len = user.getLives(); i < len; i++) {
-            ctx.fillStyle = "#FFFF00";
+        // Set up text styling
+        ctx.fillStyle = "#FFFFFF";
+        ctx.font = "12px 'Press Start 2P', monospace";
+        ctx.strokeStyle = "#000000";
+        ctx.lineWidth = 2;
+
+        // Helper function to pad numbers with zeros
+        function padNumber(num, digits) {
+            var str = num.toString();
+            while (str.length < digits) {
+                str = "0" + str;
+            }
+            return str;
+        }
+
+        // Left side: Score (zero-padded)
+        var scoreValue = padNumber(user.theScore(), 2);
+        var scoreText = "Score: " + scoreValue;
+        ctx.strokeText(scoreText, 15, textBase);
+        ctx.fillText(scoreText, 15, textBase);
+
+        // Center: Lives icons only (no label)
+        var livesCount = user.getLives();
+        var livesSpacing = 30; // Increased spacing between icons
+        var livesTotalWidth = livesCount * livesSpacing; // Width for all icons with spacing
+        var livesStartX = (canvasWidth / 2) - (livesTotalWidth / 2);
+        
+        for (var i = 0, len = livesCount; i < len; i++) {
+            ctx.fillStyle = "#FFD700";
             ctx.beginPath();
-            ctx.moveTo(150 + (25 * i) + map.blockSize / 2,
+            ctx.moveTo(livesStartX + (livesSpacing * i) + map.blockSize / 2,
                        (topLeft+1) + map.blockSize / 2);
             
-            ctx.arc(150 + (25 * i) + map.blockSize / 2,
+            ctx.arc(livesStartX + (livesSpacing * i) + map.blockSize / 2,
                     (topLeft+1) + map.blockSize / 2,
                     map.blockSize / 2, Math.PI * 0.25, Math.PI * 1.75, false);
             ctx.fill();
+            
+            // Add outline
+            ctx.strokeStyle = "#8B6914";
+            ctx.lineWidth = 1;
+            ctx.stroke();
         }
 
-        ctx.fillStyle = !soundDisabled() ? "#00FF00" : "#FF0000";
-        ctx.font = "bold 16px sans-serif";
-        //ctx.fillText("♪", 10, textBase);
-        ctx.fillText("s", 10, textBase);
-
-        ctx.fillStyle = "#FFFF00";
-        ctx.font      = "14px Calibri";
-        ctx.fillText("Score: " + user.theScore(), 30, textBase);
-        ctx.fillText("Level: " + level, 260, textBase);
+        // Right side: Level (zero-padded)
+        var levelValue = padNumber(level, 2);
+        var levelText = "Level: " + levelValue;
+        var levelTextWidth = ctx.measureText(levelText).width;
+        var levelX = canvasWidth - levelTextWidth - 15;
+        ctx.fillStyle = "#FFFFFF";
+        ctx.strokeStyle = "#000000";
+        ctx.lineWidth = 2;
+        ctx.strokeText(levelText, levelX, textBase);
+        ctx.fillText(levelText, levelX, textBase);
     }
 
     function redrawBlock(pos) {
@@ -258,7 +310,19 @@ var PACMAN = (function () {
     function init(wrapper, root) {
         
         var i, len, ghost,
-            blockSize = wrapper.offsetWidth / 19,
+            // Calculate blockSize based on viewport dimensions to fit screen
+            // Use viewport dimensions directly since wrapper might not be visible yet
+            viewportWidth = window.innerWidth * 0.9,
+            viewportHeight = window.innerHeight * 0.9,
+            // Game dimensions: 19 blocks wide, 22 blocks tall + 30px footer
+            gameWidth = 19,
+            gameHeight = 22,
+            footerHeight = 30,
+            // Calculate blockSize based on both width and height constraints
+            blockSizeByWidth = viewportWidth / gameWidth,
+            blockSizeByHeight = (viewportHeight - footerHeight) / gameHeight,
+            // Use the smaller to ensure it fits both dimensions
+            blockSize = Math.min(blockSizeByWidth, blockSizeByHeight),
             canvas    = document.createElement("canvas");
         
         canvas.setAttribute("width", (blockSize * 19) + "px");
@@ -317,8 +381,21 @@ var PACMAN = (function () {
         timer = window.setInterval(mainLoop, 1000 / Pacman.FPS);
     };
     
+    function toggleSound() {
+        var wasDisabled = soundDisabled();
+        localStorage["soundDisabled"] = !wasDisabled;
+        if (!wasDisabled) {
+            // Sound was enabled, now disable it
+            if (audio) {
+                audio.disableSound();
+            }
+        }
+    }
+    
     return {
-        "init" : init
+        "init" : init,
+        "toggleSound" : toggleSound,
+        "soundDisabled" : soundDisabled
     };
     
 }());
