@@ -23,15 +23,6 @@
 		<div class="minecraft-title">
 			<h1 class="title-text">Malware Mayhem</h1>
 		</div>
-		<div id="instruction-panel" class="instruction-panel">
-			<h2 class="instruction-title">Cyber Threats in the Network</h2>
-			<ul class="instruction-list">
-				<li><span class="malware-name">Virus:</span> corrupts score</li>
-				<li><span class="malware-name">Ransomware:</span> slows the agent</li>
-				<li><span class="malware-name">Worm:</span> destabilizes movement</li>
-				<li><span class="malware-name">Trojan:</span> disables power-ups</li>
-			</ul>
-		</div>
 		<button id="play-button" class="minecraft-button">PLAY</button>
 	</div>
 	
@@ -42,23 +33,43 @@
 			<ul class="game-instruction-list">
 				<li>
 					<img src="images/viruss.png" alt="Virus" class="malware-image">
-					<span class="malware-name">Virus:</span> corrupts score
+					<span class="malware-name">Virus:</span> -50 points
 				</li>
 				<li>
 					<img src="images/ransomwaree.png" alt="Ransomware" class="malware-image">
-					<span class="malware-name">Ransomware:</span> slows the agent
+					<span class="malware-name">Ransomware:</span> -100 points
 				</li>
 				<li>
 					<img src="images/worm.png" alt="Worm" class="malware-image">
-					<span class="malware-name">Worm:</span> destabilizes movement
+					<span class="malware-name">Worm:</span> -200 points
 				</li>
 				<li>
 					<img src="images/trojan.png" alt="Trojan" class="malware-image">
-					<span class="malware-name">Trojan:</span> disables power-ups
+					<span class="malware-name">Trojan:</span> -300 points
 				</li>
 			</ul>
 		</div>
 		<div id="pacman"></div>
+	</div>
+
+	<!-- Game Over Screen (hidden initially) -->
+	<div id="game-over-screen" style="display: none;">
+		<div class="minecraft-title">
+			<h1 class="title-text">GAME OVER</h1>
+		</div>
+		<div id="game-over-panel" class="game-over-panel">
+			<div id="final-score-display" class="final-score-display"></div>
+			<div id="name-input-section" class="name-input-section">
+				<label for="player-name-input" class="name-input-label">Enter Your Name:</label>
+				<input type="text" id="player-name-input" class="name-input" maxlength="20" placeholder="Player">
+				<button id="submit-score-button" class="minecraft-button-small">Submit Score</button>
+			</div>
+			<div id="leaderboard-section" class="leaderboard-section" style="display: none;">
+				<h2 class="leaderboard-title">Leaderboard</h2>
+				<div id="leaderboard-list" class="leaderboard-list"></div>
+				<button id="play-again-button" class="minecraft-button-small">Play Again</button>
+			</div>
+		</div>
 	</div>
 
 	<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/modernizr/2.8.3/modernizr.min.js"></script>

@@ -28,6 +28,10 @@ Pacman.User = function (game, map, rootPath) {
         }
     };
 
+    function setScore(newScore) {
+        score = newScore;
+    };
+
     function theScore() { 
         return score;
     };
@@ -422,6 +426,7 @@ Pacman.User = function (game, map, rootPath) {
         "getLives"          : getLives,
         "score"             : score,
         "addScore"          : addScore,
+        "setScore"          : setScore,
         "theScore"          : theScore,
         "keyDown"           : keyDown,
         "move"              : move,

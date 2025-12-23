@@ -19,6 +19,7 @@ var NONE        = 4,
     COUNTDOWN   = 8,
     EATEN_PAUSE = 9,
     DYING       = 10,
+    GAME_OVER   = 12,
     Pacman      = {};
 
 Pacman.FPS = 30;

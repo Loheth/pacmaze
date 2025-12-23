@@ -267,6 +267,246 @@ body {
 	left: 100%;
 }
 
+/* Game Over Screen Styles */
+#game-over-screen {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: flex-start;
+	min-height: 100vh;
+	width: 100%;
+	padding: 20px;
+	padding-top: 40px;
+	box-sizing: border-box;
+	background-image: url('../images/Gemini_Generated_Image_pmiy2lpmiy2lpmiy.png');
+	background-size: cover;
+	background-position: center;
+	background-repeat: no-repeat;
+}
+
+.game-over-panel {
+	font-family: 'Press Start 2P', cursive;
+	background: linear-gradient(135deg, #8B7355 0%, #6B5B3D 50%, #4A3A2A 100%);
+	border: 4px solid #2A2A2A;
+	border-top-color: #A0A0A0;
+	border-left-color: #A0A0A0;
+	border-right-color: #2A2A2A;
+	border-bottom-color: #2A2A2A;
+	border-radius: 8px;
+	padding: 30px;
+	max-width: 600px;
+	width: 100%;
+	box-shadow: 
+		inset 0 2px 0 rgba(255,255,255,0.3),
+		inset 0 -2px 0 rgba(0,0,0,0.5),
+		0 8px 16px rgba(0,0,0,0.4);
+	margin-top: 20px;
+}
+
+.final-score-display {
+	font-size: 18px;
+	color: #FFD700;
+	text-align: center;
+	margin-bottom: 25px;
+	text-shadow: 
+		2px 2px 0px #2A2A2A,
+		1px 1px 0px #000000;
+	padding: 15px;
+	background: rgba(0, 0, 0, 0.3);
+	border-radius: 4px;
+}
+
+.name-input-section {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 15px;
+}
+
+.name-input-label {
+	font-size: 12px;
+	color: #FFFFFF;
+	text-shadow: 
+		1px 1px 0px #2A2A2A,
+		1px 1px 0px #000000;
+	margin-bottom: 10px;
+}
+
+.name-input {
+	font-family: 'Press Start 2P', cursive;
+	font-size: 14px;
+	padding: 12px 15px;
+	width: 100%;
+	max-width: 400px;
+	background: #2A2A2A;
+	border: 3px solid #4A4A4A;
+	border-top-color: #6A6A6A;
+	border-left-color: #6A6A6A;
+	border-right-color: #1A1A1A;
+	border-bottom-color: #1A1A1A;
+	color: #FFFFFF;
+	text-align: center;
+	box-shadow: 
+		inset 0 2px 0 rgba(0,0,0,0.5),
+		inset 0 -2px 0 rgba(255,255,255,0.1);
+}
+
+.name-input:focus {
+	outline: none;
+	border-color: #FFD700;
+	box-shadow: 
+		inset 0 2px 0 rgba(0,0,0,0.5),
+		inset 0 -2px 0 rgba(255,255,255,0.1),
+		0 0 10px rgba(255, 215, 0, 0.5);
+}
+
+.minecraft-button-small {
+	font-family: 'Press Start 2P', cursive;
+	font-size: 14px;
+	color: #FFFFFF;
+	background: linear-gradient(to bottom, #8B7355 0%, #6B5B3D 50%, #4A3A2A 100%);
+	border: 3px solid #2A2A2A;
+	border-top-color: #A0A0A0;
+	border-left-color: #A0A0A0;
+	border-right-color: #2A2A2A;
+	border-bottom-color: #2A2A2A;
+	padding: 12px 30px;
+	cursor: pointer;
+	text-transform: uppercase;
+	letter-spacing: 1px;
+	box-shadow: 
+		inset 0 2px 0 rgba(255,255,255,0.2),
+		inset 0 -2px 0 rgba(0,0,0,0.5),
+		0 4px 8px rgba(0,0,0,0.3);
+	transition: all 0.1s;
+	margin-top: 10px;
+}
+
+.minecraft-button-small:hover {
+	background: linear-gradient(to bottom, #9B8365 0%, #7B6B4D 50%, #5A4A3A 100%);
+	transform: translateY(-2px);
+	box-shadow: 
+		inset 0 2px 0 rgba(255,255,255,0.3),
+		inset 0 -2px 0 rgba(0,0,0,0.5),
+		0 6px 12px rgba(0,0,0,0.4);
+}
+
+.minecraft-button-small:active {
+	transform: translateY(0px);
+	border-top-color: #2A2A2A;
+	border-left-color: #2A2A2A;
+	border-right-color: #A0A0A0;
+	border-bottom-color: #A0A0A0;
+	box-shadow: 
+		inset 0 2px 0 rgba(0,0,0,0.3),
+		inset 0 -2px 0 rgba(255,255,255,0.2),
+		0 2px 4px rgba(0,0,0,0.3);
+}
+
+.leaderboard-section {
+	margin-top: 30px;
+}
+
+.leaderboard-title {
+	font-size: 16px;
+	color: #FFD700;
+	text-align: center;
+	margin-bottom: 20px;
+	text-shadow: 
+		2px 2px 0px #2A2A2A,
+		1px 1px 0px #000000;
+}
+
+.leaderboard-list {
+	max-height: 400px;
+	overflow-y: auto;
+	padding: 10px;
+	background: rgba(0, 0, 0, 0.3);
+	border-radius: 4px;
+	margin-bottom: 20px;
+}
+
+.leaderboard-item {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	padding: 10px 15px;
+	margin: 5px 0;
+	background: rgba(255, 255, 255, 0.05);
+	border: 2px solid rgba(255, 255, 255, 0.1);
+	border-radius: 4px;
+	font-size: 10px;
+	color: #FFFFFF;
+	text-shadow: 1px 1px 0px #000000;
+}
+
+.leaderboard-item.rank-1 {
+	background: rgba(255, 215, 0, 0.2);
+	border-color: #FFD700;
+}
+
+.leaderboard-item.rank-2 {
+	background: rgba(192, 192, 192, 0.2);
+	border-color: #C0C0C0;
+}
+
+.leaderboard-item.rank-3 {
+	background: rgba(205, 127, 50, 0.2);
+	border-color: #CD7F32;
+}
+
+.leaderboard-rank {
+	font-weight: bold;
+	color: #FFD700;
+	min-width: 30px;
+}
+
+.leaderboard-name {
+	flex: 1;
+	text-align: left;
+	margin-left: 15px;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.leaderboard-score {
+	font-weight: bold;
+	color: #FFD700;
+	min-width: 80px;
+	text-align: right;
+}
+
+@media (max-width: 768px) {
+	.game-over-panel {
+		padding: 20px;
+		max-width: 90%;
+	}
+	
+	.final-score-display {
+		font-size: 14px;
+	}
+	
+	.name-input {
+		font-size: 12px;
+		padding: 10px 12px;
+	}
+	
+	.minecraft-button-small {
+		font-size: 12px;
+		padding: 10px 24px;
+	}
+	
+	.leaderboard-title {
+		font-size: 14px;
+	}
+	
+	.leaderboard-item {
+		font-size: 9px;
+		padding: 8px 12px;
+	}
+}
+
 /* Game Container Styles */
 #game-container {
 	width: 100%;

@@ -41,6 +41,22 @@ Pacman.Ghost = function (game, map, colour) {
     function isDangerous() {
         return eaten === null;
     };
+    
+    function isVirus() {
+        return colour === "#00FF00";
+    };
+
+    function isRansomware() {
+        return colour === "#FF0000";
+    };
+
+    function isWorm() {
+        return colour === "#FFAA00";
+    };
+
+    function isTrojan() {
+        return colour === "#6A5ACD";
+    };
 
     function isHidden() { 
         return eatable === null && eaten !== null;
@@ -288,6 +304,10 @@ Pacman.Ghost = function (game, map, colour) {
         "eat"         : eat,
         "isVunerable" : isVunerable,
         "isDangerous" : isDangerous,
+        "isVirus"     : isVirus,
+        "isRansomware": isRansomware,
+        "isWorm"      : isWorm,
+        "isTrojan"    : isTrojan,
         "makeEatable" : makeEatable,
         "reset"       : reset,
         "move"        : move,

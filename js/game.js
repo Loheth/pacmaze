@@ -15,7 +15,11 @@ var PACMAN = (function () {
         timer        = null,
         map          = null,
         user         = null,
-        stored       = null;
+        stored       = null,
+        virusMessageTimer = null,
+        ransomwareMessageTimer = null,
+        wormMessageTimer = null,
+        trojanMessageTimer = null;
 
     function getTick() { 
         return tick;
@@ -42,6 +46,58 @@ var PACMAN = (function () {
         ctx.strokeText(text, x, (map.height * 10) + 8);
         ctx.fillText(text, x, (map.height * 10) + 8);
     }
+    
+    function drawVirusMessage() {
+        var text = "SYSTEM INFECTED";
+        ctx.fillStyle = "#FF0000";
+        ctx.font      = "bold 24px 'Press Start 2P', monospace";
+        ctx.strokeStyle = "#000000";
+        ctx.lineWidth = 4;
+        var width = ctx.measureText(text).width,
+            x     = ((map.width * map.blockSize) - width) / 2,
+            y     = (map.height * map.blockSize) / 2;
+        ctx.strokeText(text, x, y);
+        ctx.fillText(text, x, y);
+    }
+
+    function drawRansomwareMessage() {
+        var text = "FILES ENCRYPTED";
+        ctx.fillStyle = "#FF0000";
+        ctx.font      = "bold 24px 'Press Start 2P', monospace";
+        ctx.strokeStyle = "#000000";
+        ctx.lineWidth = 4;
+        var width = ctx.measureText(text).width,
+            x     = ((map.width * map.blockSize) - width) / 2,
+            y     = (map.height * map.blockSize) / 2;
+        ctx.strokeText(text, x, y);
+        ctx.fillText(text, x, y);
+    }
+
+    function drawWormMessage() {
+        var text = "NETWORK COMPROMISED";
+        ctx.fillStyle = "#FF0000";
+        ctx.font      = "bold 24px 'Press Start 2P', monospace";
+        ctx.strokeStyle = "#000000";
+        ctx.lineWidth = 4;
+        var width = ctx.measureText(text).width,
+            x     = ((map.width * map.blockSize) - width) / 2,
+            y     = (map.height * map.blockSize) / 2;
+        ctx.strokeText(text, x, y);
+        ctx.fillText(text, x, y);
+    }
+
+    function drawTrojanMessage() {
+        var text = "BACKDOOR INSTALLED";
+        ctx.fillStyle = "#FF0000";
+        ctx.font      = "bold 24px 'Press Start 2P', monospace";
+        ctx.strokeStyle = "#000000";
+        ctx.lineWidth = 4;
+        var width = ctx.measureText(text).width,
+            x     = ((map.width * map.blockSize) - width) / 2,
+            y     = (map.height * map.blockSize) / 2;
+        ctx.strokeText(text, x, y);
+        ctx.fillText(text, x, y);
+    }
 
     function soundDisabled() {
         return localStorage["soundDisabled"] === "true";
@@ -58,6 +114,12 @@ var PACMAN = (function () {
     }    
 
     function startNewGame() {
+        // Make sure game over screen is hidden
+        var gameOverScreen = document.getElementById("game-over-screen");
+        var gameContainer = document.getElementById("game-container");
+        if (gameOverScreen) gameOverScreen.style.display = "none";
+        if (gameContainer) gameContainer.style.display = "flex";
+        
         setState(WAITING);
         level = 1;
         user.reset();
@@ -67,6 +129,19 @@ var PACMAN = (function () {
     }
 
     function keyDown(e) {
+        // Don't process game keys if we're in game over state or if an input field is focused
+        var activeElement = document.activeElement;
+        var isInputFocused = activeElement && (
+            activeElement.tagName === 'INPUT' || 
+            activeElement.tagName === 'TEXTAREA' ||
+            activeElement.isContentEditable
+        );
+        
+        if (state === GAME_OVER || isInputFocused) {
+            // Allow input fields to work normally
+            return true;
+        }
+        
         if (e.keyCode === KEY.N) {
             startNewGame();
         } else if (e.keyCode === KEY.S) {
@@ -93,6 +168,161 @@ var PACMAN = (function () {
         user.loseLife();
         if (user.getLives() > 0) {
             startLevel();
+        } else {
+            // Game over - no lives left
+            setState(GAME_OVER);
+            showGameOverScreen();
+        }
+    }
+
+    function getLeaderboard() {
+        var leaderboard = localStorage.getItem("malwareMayhemLeaderboard");
+        if (leaderboard) {
+            try {
+                return JSON.parse(leaderboard);
+            } catch (e) {
+                return [];
+            }
+        }
+        return [];
+    }
+
+    function saveToLeaderboard(name, score) {
+        var leaderboard = getLeaderboard();
+        leaderboard.push({
+            name: name || "Anonymous",
+            score: score,
+            date: new Date().toISOString()
+        });
+        // Sort by score descending
+        leaderboard.sort(function(a, b) {
+            return b.score - a.score;
+        });
+        // Keep only top 5
+        leaderboard = leaderboard.slice(0, 5);
+        localStorage.setItem("malwareMayhemLeaderboard", JSON.stringify(leaderboard));
+        return leaderboard;
+    }
+
+    function displayLeaderboard() {
+        var leaderboard = getLeaderboard();
+        var listElement = document.getElementById("leaderboard-list");
+        if (!listElement) return;
+        
+        listElement.innerHTML = "";
+        
+        if (leaderboard.length === 0) {
+            listElement.innerHTML = '<div style="text-align: center; color: #FFFFFF; padding: 20px; font-size: 10px;">No scores yet. Be the first!</div>';
+            return;
+        }
+        
+        // Display only top 5
+        var top5 = leaderboard.slice(0, 5);
+        
+        for (var i = 0; i < top5.length; i++) {
+            var item = top5[i];
+            var rankClass = "";
+            if (i === 0) rankClass = "rank-1";
+            else if (i === 1) rankClass = "rank-2";
+            else if (i === 2) rankClass = "rank-3";
+            
+            var rankText = (i + 1) + ".";
+            var nameText = item.name.length > 15 ? item.name.substring(0, 15) + "..." : item.name;
+            var scoreText = item.score.toString().padStart(6, "0");
+            
+            var itemDiv = document.createElement("div");
+            itemDiv.className = "leaderboard-item " + rankClass;
+            itemDiv.innerHTML = '<span class="leaderboard-rank">' + rankText + '</span>' +
+                               '<span class="leaderboard-name">' + nameText + '</span>' +
+                               '<span class="leaderboard-score">' + scoreText + '</span>';
+            listElement.appendChild(itemDiv);
+        }
+    }
+
+    function showGameOverScreen() {
+        var gameContainer = document.getElementById("game-container");
+        var gameOverScreen = document.getElementById("game-over-screen");
+        var finalScoreDisplay = document.getElementById("final-score-display");
+        var nameInputSection = document.getElementById("name-input-section");
+        var leaderboardSection = document.getElementById("leaderboard-section");
+        var playerNameInput = document.getElementById("player-name-input");
+        var submitButton = document.getElementById("submit-score-button");
+        var playAgainButton = document.getElementById("play-again-button");
+        
+        if (!gameOverScreen || !gameContainer) return;
+        
+        // Hide game container, show game over screen
+        gameContainer.style.display = "none";
+        gameOverScreen.style.display = "flex";
+        
+        // Display final score
+        var finalScore = user.theScore();
+        if (finalScoreDisplay) {
+            finalScoreDisplay.textContent = "Final Score: " + finalScore.toString().padStart(6, "0");
+        }
+        
+        // Show name input section, hide leaderboard initially
+        if (nameInputSection) nameInputSection.style.display = "flex";
+        if (leaderboardSection) leaderboardSection.style.display = "none";
+        
+        // Focus on name input
+        if (playerNameInput) {
+            playerNameInput.value = "";
+            setTimeout(function() {
+                playerNameInput.focus();
+            }, 100);
+        }
+        
+        // Submit button handler
+        function handleSubmit() {
+            // Get fresh reference to input field
+            var nameInput = document.getElementById("player-name-input");
+            var name = nameInput ? nameInput.value.trim() : "";
+            if (!name) name = "Anonymous";
+            
+            saveToLeaderboard(name, finalScore);
+            displayLeaderboard();
+            
+            // Hide name input, show leaderboard
+            if (nameInputSection) nameInputSection.style.display = "none";
+            if (leaderboardSection) leaderboardSection.style.display = "block";
+        }
+        
+        // Remove old event listeners by cloning and replacing
+        if (submitButton) {
+            var newSubmitButton = submitButton.cloneNode(true);
+            submitButton.parentNode.replaceChild(newSubmitButton, submitButton);
+            newSubmitButton.addEventListener("click", handleSubmit);
+            submitButton = newSubmitButton;
+        }
+        
+        // Enter key on input - need to get fresh reference after cloning
+        var nameInput = document.getElementById("player-name-input");
+        if (nameInput) {
+            nameInput.onkeydown = function(e) {
+                // Don't prevent default for normal typing
+                if (e.keyCode === KEY.ENTER) {
+                    e.preventDefault();
+                    handleSubmit();
+                }
+            };
+            // Ensure input is enabled and can receive focus
+            nameInput.disabled = false;
+            nameInput.readOnly = false;
+        }
+        
+        // Play again button handler
+        function handlePlayAgain() {
+            gameOverScreen.style.display = "none";
+            gameContainer.style.display = "flex";
+            startNewGame();
+        }
+        
+        if (playAgainButton) {
+            var newPlayAgainButton = playAgainButton.cloneNode(true);
+            playAgainButton.parentNode.replaceChild(newPlayAgainButton, playAgainButton);
+            newPlayAgainButton.addEventListener("click", handlePlayAgain);
+            playAgainButton = newPlayAgainButton;
         }
     }
 
@@ -269,9 +499,89 @@ var PACMAN = (function () {
                     setState(EATEN_PAUSE);
                     timerStart = tick;
                 } else if (ghosts[i].isDangerous()) {
-                    audio.play("die");
-                    setState(DYING);
-                    timerStart = tick;
+                    // Check malware type for special handling
+                    if (ghosts[i].isVirus()) {
+                        // Virus collision: reduce score by 50, lose a life, show message
+                        var currentScore = user.theScore();
+                        user.addScore(-50);
+                        // Ensure score doesn't go below 0
+                        if (user.theScore() < 0) {
+                            user.setScore(0);
+                        }
+                        user.loseLife();
+                        virusMessageTimer = tick;
+                        // If player has lives left, restart level after message
+                        if (user.getLives() > 0) {
+                            setState(WAITING);
+                        } else {
+                            // No lives left, game over
+                            setState(GAME_OVER);
+                            virusMessageTimer = null;
+                            showGameOverScreen();
+                        }
+                    } else if (ghosts[i].isRansomware()) {
+                        // Ransomware collision: reduce score by 100, lose a life, show message
+                        var currentScore = user.theScore();
+                        user.addScore(-100);
+                        // Ensure score doesn't go below 0
+                        if (user.theScore() < 0) {
+                            user.setScore(0);
+                        }
+                        user.loseLife();
+                        ransomwareMessageTimer = tick;
+                        // If player has lives left, restart level after message
+                        if (user.getLives() > 0) {
+                            setState(WAITING);
+                        } else {
+                            // No lives left, game over
+                            setState(GAME_OVER);
+                            ransomwareMessageTimer = null;
+                            showGameOverScreen();
+                        }
+                    } else if (ghosts[i].isWorm()) {
+                        // Worm collision: reduce score by 200, lose a life, show message
+                        var currentScore = user.theScore();
+                        user.addScore(-200);
+                        // Ensure score doesn't go below 0
+                        if (user.theScore() < 0) {
+                            user.setScore(0);
+                        }
+                        user.loseLife();
+                        wormMessageTimer = tick;
+                        // If player has lives left, restart level after message
+                        if (user.getLives() > 0) {
+                            setState(WAITING);
+                        } else {
+                            // No lives left, game over
+                            setState(GAME_OVER);
+                            wormMessageTimer = null;
+                            showGameOverScreen();
+                        }
+                    } else if (ghosts[i].isTrojan()) {
+                        // Trojan collision: reduce score by 300, lose a life, show message
+                        var currentScore = user.theScore();
+                        user.addScore(-300);
+                        // Ensure score doesn't go below 0
+                        if (user.theScore() < 0) {
+                            user.setScore(0);
+                        }
+                        user.loseLife();
+                        trojanMessageTimer = tick;
+                        // If player has lives left, restart level after message
+                        if (user.getLives() > 0) {
+                            setState(WAITING);
+                        } else {
+                            // No lives left, game over
+                            setState(GAME_OVER);
+                            trojanMessageTimer = null;
+                            showGameOverScreen();
+                        }
+                    } else {
+                        // Other dangerous ghosts kill the player
+                        audio.play("die");
+                        setState(DYING);
+                        timerStart = tick;
+                    }
                 }
             }
         }                             
@@ -289,10 +599,20 @@ var PACMAN = (function () {
 
         if (state === PLAYING) {
             mainDraw();
-        } else if (state === WAITING && stateChanged) {            
+        } else if (state === WAITING && stateChanged) {
             stateChanged = false;
-            map.draw(ctx);
-            dialog("Press N to start a New game");            
+            // Don't show "Press N" message if malware message is being displayed
+            if (virusMessageTimer === null && ransomwareMessageTimer === null && 
+                wormMessageTimer === null && trojanMessageTimer === null) {
+                map.draw(ctx);
+                dialog("Press N to start a New game");
+            } else {
+                // Malware message will be shown, just draw the map
+                map.draw(ctx);
+            }
+        } else if (state === GAME_OVER) {
+            // Game over state - screen is handled by showGameOverScreen()
+            // Don't draw anything on canvas
         } else if (state === EATEN_PAUSE && 
                    (tick - timerStart) > (Pacman.FPS / 3)) {
             map.draw(ctx);
@@ -325,6 +645,67 @@ var PACMAN = (function () {
         } 
 
         drawFooter();
+        
+        // Show virus message for 2 seconds (drawn on top of everything)
+        if (virusMessageTimer !== null) {
+            if ((tick - virusMessageTimer) < (Pacman.FPS * 2)) {
+                drawVirusMessage();
+            } else {
+                // Message has been shown for 2 seconds, now restart level if lives remain
+                virusMessageTimer = null;
+                if (state === WAITING && user.getLives() > 0) {
+                    startLevel();
+                } else if (state === WAITING && user.getLives() <= 0) {
+                    setState(GAME_OVER);
+                    showGameOverScreen();
+                }
+            }
+        }
+
+        // Show ransomware message for 2 seconds
+        if (ransomwareMessageTimer !== null) {
+            if ((tick - ransomwareMessageTimer) < (Pacman.FPS * 2)) {
+                drawRansomwareMessage();
+            } else {
+                ransomwareMessageTimer = null;
+                if (state === WAITING && user.getLives() > 0) {
+                    startLevel();
+                } else if (state === WAITING && user.getLives() <= 0) {
+                    setState(GAME_OVER);
+                    showGameOverScreen();
+                }
+            }
+        }
+
+        // Show worm message for 2 seconds
+        if (wormMessageTimer !== null) {
+            if ((tick - wormMessageTimer) < (Pacman.FPS * 2)) {
+                drawWormMessage();
+            } else {
+                wormMessageTimer = null;
+                if (state === WAITING && user.getLives() > 0) {
+                    startLevel();
+                } else if (state === WAITING && user.getLives() <= 0) {
+                    setState(GAME_OVER);
+                    showGameOverScreen();
+                }
+            }
+        }
+
+        // Show trojan message for 2 seconds
+        if (trojanMessageTimer !== null) {
+            if ((tick - trojanMessageTimer) < (Pacman.FPS * 2)) {
+                drawTrojanMessage();
+            } else {
+                trojanMessageTimer = null;
+                if (state === WAITING && user.getLives() > 0) {
+                    startLevel();
+                } else if (state === WAITING && user.getLives() <= 0) {
+                    setState(GAME_OVER);
+                    showGameOverScreen();
+                }
+            }
+        }
     }
 
     function eatenPill() {
@@ -345,6 +726,19 @@ var PACMAN = (function () {
     };
 
     function keyPress(e) { 
+        // Don't prevent default if we're in game over state or if an input field is focused
+        var activeElement = document.activeElement;
+        var isInputFocused = activeElement && (
+            activeElement.tagName === 'INPUT' || 
+            activeElement.tagName === 'TEXTAREA' ||
+            activeElement.isContentEditable
+        );
+        
+        if (state === GAME_OVER || isInputFocused) {
+            // Allow input fields to work normally
+            return;
+        }
+        
         if (state !== WAITING && state !== PAUSE) { 
             e.preventDefault();
             e.stopPropagation();
