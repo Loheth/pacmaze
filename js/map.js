@@ -125,13 +125,15 @@ Pacman.Map = function (size) {
         ctx.fillStyle = "#4A3A2A";
         ctx.fillRect(0, 0, canvasWidth, canvasHeight);
 
-        drawWall(ctx);
-        
+        // Draw all blocks first (this fills wall areas with background color)
         for (i = 0; i < height; i += 1) {
 		    for (j = 0; j < width; j += 1) {
 			    drawBlock(i, j, ctx);
 		    }
 	    }
+        
+        // Draw walls on top so they're visible
+        drawWall(ctx);
     };
     
     function drawBlock(y, x, ctx) {
