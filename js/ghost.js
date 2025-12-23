@@ -105,11 +105,8 @@ Pacman.Ghost = function (game, map, colour) {
 
     function getColour() { 
         if (eatable) { 
-            if (secondsAgo(eatable) > 5) { 
-                return game.getTick() % 20 > 10 ? "#FFFFFF" : "#0000BB";
-            } else { 
-                return "#0000BB";
-            }
+            // Return original color for dimming effect (no blue tint)
+            return colour;
         } else if(eaten) { 
             return "#222";
         } 
@@ -173,18 +170,13 @@ Pacman.Ghost = function (game, map, colour) {
         // Save context state
         ctx.save();
 
-        // Apply color tinting for vulnerable state
+        // Apply dimming effect for vulnerable state
         if (eatable) {
-            // When vulnerable, apply a blue tint overlay
+            // When vulnerable, just dim the ghost (reduced opacity)
             ctx.globalCompositeOperation = "source-over";
+            ctx.globalAlpha = 0.4; // Dim the ghost
             ctx.drawImage(malwareImage, left, top, s, s);
-            
-            // Apply blue tint overlay
-            ctx.globalCompositeOperation = "multiply";
-            ctx.fillStyle = baseColor;
-            ctx.globalAlpha = 0.6;
-            ctx.fillRect(left, top, s, s);
-            ctx.globalAlpha = 1.0;
+            ctx.globalAlpha = 1.0; // Reset alpha
             ctx.globalCompositeOperation = "source-over";
         } else if (eaten) {
             // When eaten, draw dark/disabled version
