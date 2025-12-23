@@ -4,7 +4,9 @@ Pacman.Map = function (size) {
         width     = null, 
         blockSize = size,
         pillSize  = 0,
-        map       = null;
+        map       = null,
+        backgroundImage = null,
+        backgroundLoaded = false;
     
     function withinBounds(y, x) {
         return y >= 0 && y < height && x >= 0 && x < width;
@@ -55,10 +57,23 @@ Pacman.Map = function (size) {
         }
     }
     
+    function loadBackground() {
+        backgroundImage = new Image();
+        backgroundImage.onload = function() {
+            backgroundLoaded = true;
+        };
+        backgroundImage.onerror = function() {
+            backgroundLoaded = false;
+            console.log("Background image failed to load");
+        };
+        backgroundImage.src = "images/Gemini_Generated_Image_pmiy2lpmiy2lpmiy.png";
+    }
+    
     function reset() {       
         map    = Pacman.MAP.clone();
         height = map.length;
-        width  = map[0].length;        
+        width  = map[0].length;
+        loadBackground();
     };
 
     function block(pos) {
@@ -78,15 +93,18 @@ Pacman.Map = function (size) {
         for (i = 0; i < height; i += 1) {
 		    for (j = 0; j < width; j += 1) {
                 if (map[i][j] === Pacman.PILL) {
+                    var pillX = j * blockSize;
+                    var pillY = i * blockSize;
+                    
                     ctx.beginPath();
 
-                    ctx.fillStyle = "#1a1a1a";
-		            ctx.fillRect((j * blockSize), (i * blockSize), 
-                                 blockSize, blockSize);
+                    // Use UI-matching background color for pill spaces
+                    ctx.fillStyle = "#5A4A3A";
+		            ctx.fillRect(pillX, pillY, blockSize, blockSize);
 
                     ctx.fillStyle = "#50C878";
-                    ctx.arc((j * blockSize) + blockSize / 2,
-                            (i * blockSize) + blockSize / 2,
+                    ctx.arc(pillX + blockSize / 2,
+                            pillY + blockSize / 2,
                             Math.abs(5 - (pillSize/3)), 
                             0, 
                             Math.PI * 2, false); 
@@ -100,9 +118,12 @@ Pacman.Map = function (size) {
     function draw(ctx) {
         
         var i, j, size = blockSize;
+        var canvasWidth = width * size;
+        var canvasHeight = height * size;
 
-        ctx.fillStyle = "#1a1a1a";
-	    ctx.fillRect(0, 0, width * size, height * size);
+        // Use UI-matching background color (dark brown/beige to match game UI)
+        ctx.fillStyle = "#4A3A2A";
+        ctx.fillRect(0, 0, canvasWidth, canvasHeight);
 
         drawWall(ctx);
         
@@ -116,6 +137,10 @@ Pacman.Map = function (size) {
     function drawBlock(y, x, ctx) {
 
         var layout = map[y][x];
+        var blockX = x * blockSize;
+        var blockY = y * blockSize;
+        var canvasWidth = width * blockSize;
+        var canvasHeight = height * blockSize;
 
         if (layout === Pacman.PILL) {
             return;
@@ -126,14 +151,14 @@ Pacman.Map = function (size) {
         if (layout === Pacman.EMPTY || layout === Pacman.BLOCK || 
             layout === Pacman.BISCUIT) {
             
-            ctx.fillStyle = "#1a1a1a";
-		    ctx.fillRect((x * blockSize), (y * blockSize), 
-                         blockSize, blockSize);
+            // Use UI-matching background color for empty spaces (slightly lighter than main background)
+            ctx.fillStyle = "#5A4A3A";
+		    ctx.fillRect(blockX, blockY, blockSize, blockSize);
 
             if (layout === Pacman.BISCUIT) {
                 ctx.fillStyle = "#FFD700";
-		        ctx.fillRect((x * blockSize) + (blockSize / 2.5), 
-                             (y * blockSize) + (blockSize / 2.5), 
+		        ctx.fillRect(blockX + (blockSize / 2.5), 
+                             blockY + (blockSize / 2.5), 
                              blockSize / 6, blockSize / 6);
 	        }
         }
