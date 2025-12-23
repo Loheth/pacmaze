@@ -23,11 +23,41 @@
 		<div class="minecraft-title">
 			<h1 class="title-text">Malware Mayhem</h1>
 		</div>
+		<div id="instruction-panel" class="instruction-panel">
+			<h2 class="instruction-title">Cyber Threats in the Network</h2>
+			<ul class="instruction-list">
+				<li><span class="malware-name">Virus:</span> corrupts score</li>
+				<li><span class="malware-name">Ransomware:</span> slows the agent</li>
+				<li><span class="malware-name">Worm:</span> destabilizes movement</li>
+				<li><span class="malware-name">Trojan:</span> disables power-ups</li>
+			</ul>
+		</div>
 		<button id="play-button" class="minecraft-button">PLAY</button>
 	</div>
 	
 	<!-- Game Container (hidden initially) -->
 	<div id="game-container" style="display: none;">
+		<div id="game-instruction-panel" class="game-instruction-panel">
+			<h3 class="game-instruction-title">Cyber Threats</h3>
+			<ul class="game-instruction-list">
+				<li>
+					<span class="malware-color-indicator" style="background-color: #00FF00;"></span>
+					<span class="malware-name">Virus:</span> corrupts score
+				</li>
+				<li>
+					<span class="malware-color-indicator" style="background-color: #FF0000;"></span>
+					<span class="malware-name">Ransomware:</span> slows the agent
+				</li>
+				<li>
+					<span class="malware-color-indicator" style="background-color: #FFAA00;"></span>
+					<span class="malware-name">Worm:</span> destabilizes movement
+				</li>
+				<li>
+					<span class="malware-color-indicator" style="background-color: #6A5ACD;"></span>
+					<span class="malware-name">Trojan:</span> disables power-ups
+				</li>
+			</ul>
+		</div>
 		<div id="pacman"></div>
 	</div>
 

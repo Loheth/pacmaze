@@ -4,7 +4,9 @@ Pacman.Ghost = function (game, map, colour) {
         direction = null,
         eatable   = null,
         eaten     = null,
-        due       = null;
+        due       = null,
+        malwareImage = null,
+        malwareImageLoaded = false;
     
     function getNewCoord(dir, current) { 
         
@@ -114,6 +116,97 @@ Pacman.Ghost = function (game, map, colour) {
         return colour;
     };
 
+    function getMalwareType() {
+        // Map colors to malware types
+        if (colour === "#00FF00") return "virus";      // Green -> Virus
+        if (colour === "#FF0000") return "ransomware"; // Red -> Ransomware
+        if (colour === "#FFAA00") return "worm";       // Yellow/Orange -> Worm
+        if (colour === "#6A5ACD") return "trojan";     // Blue/Purple -> Trojan
+        return "virus"; // Default
+    };
+
+    function getImagePath() {
+        var malwareType = getMalwareType();
+        var imagePaths = {
+            "virus": "images/viruss.png",
+            "ransomware": "images/ransomwaree.png",
+            "worm": "images/worm.png",
+            "trojan": "images/trojan.png"
+        };
+        return imagePaths[malwareType] || imagePaths["virus"];
+    }
+
+    function loadMalwareImage() {
+        malwareImage = new Image();
+        malwareImage.onload = function() {
+            malwareImageLoaded = true;
+            console.log("Malware image loaded: " + getImagePath());
+        };
+        malwareImage.onerror = function() {
+            malwareImageLoaded = false;
+            console.error("Failed to load malware image: " + getImagePath());
+        };
+        var imagePath = getImagePath() + "?v=" + Date.now();
+        malwareImage.src = imagePath;
+    }
+
+    function drawMalwareImage(ctx, left, top, s, baseColor) {
+        // Only draw if image is loaded
+        if (!malwareImageLoaded || !malwareImage) {
+            // Fallback: draw a simple colored rectangle while loading
+            ctx.fillStyle = baseColor;
+            ctx.fillRect(left, top, s, s);
+            return;
+        }
+
+        // Check if image is fully loaded
+        var isLoaded = malwareImage.complete && 
+                       (malwareImage.naturalWidth > 0 || malwareImage.width > 0);
+        
+        if (!isLoaded) {
+            // Still loading - draw fallback
+            ctx.fillStyle = baseColor;
+            ctx.fillRect(left, top, s, s);
+            return;
+        }
+
+        // Save context state
+        ctx.save();
+
+        // Apply color tinting for vulnerable state
+        if (eatable) {
+            // When vulnerable, apply a blue tint overlay
+            ctx.globalCompositeOperation = "source-over";
+            ctx.drawImage(malwareImage, left, top, s, s);
+            
+            // Apply blue tint overlay
+            ctx.globalCompositeOperation = "multiply";
+            ctx.fillStyle = baseColor;
+            ctx.globalAlpha = 0.6;
+            ctx.fillRect(left, top, s, s);
+            ctx.globalAlpha = 1.0;
+            ctx.globalCompositeOperation = "source-over";
+        } else if (eaten) {
+            // When eaten, draw dark/disabled version
+            ctx.globalCompositeOperation = "source-over";
+            ctx.drawImage(malwareImage, left, top, s, s);
+            
+            // Apply dark overlay
+            ctx.globalCompositeOperation = "multiply";
+            ctx.fillStyle = "#222";
+            ctx.globalAlpha = 0.8;
+            ctx.fillRect(left, top, s, s);
+            ctx.globalAlpha = 1.0;
+            ctx.globalCompositeOperation = "source-over";
+        } else {
+            // Normal state - draw image as-is
+            ctx.drawImage(malwareImage, left, top, s, s);
+        }
+
+        // Restore context state
+        ctx.restore();
+    }
+
     function draw(ctx) {
   
         var s    = map.blockSize, 
@@ -128,54 +221,10 @@ Pacman.Ghost = function (game, map, colour) {
             eaten = null;
         }
         
-        var tl = left + s;
-        var base = top + s - 3;
-        var inc = s / 10;
-
-        var high = game.getTick() % 10 > 5 ? 3  : -3;
-        var low  = game.getTick() % 10 > 5 ? -3 : 3;
-
-        ctx.fillStyle = getColour();
-        ctx.beginPath();
-
-        ctx.moveTo(left, base);
-
-        ctx.quadraticCurveTo(left, top, left + (s/2),  top);
-        ctx.quadraticCurveTo(left + s, top, left+s,  base);
+        var baseColor = getColour();
         
-        // Wavy things at the bottom
-        ctx.quadraticCurveTo(tl-(inc*1), base+high, tl - (inc * 2),  base);
-        ctx.quadraticCurveTo(tl-(inc*3), base+low, tl - (inc * 4),  base);
-        ctx.quadraticCurveTo(tl-(inc*5), base+high, tl - (inc * 6),  base);
-        ctx.quadraticCurveTo(tl-(inc*7), base+low, tl - (inc * 8),  base); 
-        ctx.quadraticCurveTo(tl-(inc*9), base+high, tl - (inc * 10), base); 
-
-        ctx.closePath();
-        ctx.fill();
-
-        ctx.beginPath();
-        ctx.fillStyle = "#FFF";
-        ctx.arc(left + 6,top + 6, s / 6, 0, 300, false);
-        ctx.arc((left + s) - 6,top + 6, s / 6, 0, 300, false);
-        ctx.closePath();
-        ctx.fill();
-
-        var f = s / 12;
-        var off = {};
-        off[RIGHT] = [f, 0];
-        off[LEFT]  = [-f, 0];
-        off[UP]    = [0, -f];
-        off[DOWN]  = [0, f];
-
-        ctx.beginPath();
-        ctx.fillStyle = "#000";
-        ctx.arc(left+6+off[direction][0], top+6+off[direction][1], 
-                s / 15, 0, 300, false);
-        ctx.arc((left+s)-6+off[direction][0], top+6+off[direction][1], 
-                s / 15, 0, 300, false);
-        ctx.closePath();
-        ctx.fill();
-
+        // Draw malware image
+        drawMalwareImage(ctx, left, top, s, baseColor);
     };
 
     function pane(pos) {
@@ -239,6 +288,9 @@ Pacman.Ghost = function (game, map, colour) {
             "old" : oldPos
         };
     };
+    
+    // Load the malware image when ghost is created
+    loadMalwareImage();
     
     return {
         "eat"         : eat,

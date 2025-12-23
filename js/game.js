@@ -3,7 +3,7 @@ var PACMAN = (function () {
     var state        = WAITING,
         audio        = null,
         ghosts       = [],
-        ghostSpecs   = ["#00FFDE", "#FF0000", "#FFB8DE", "#FFB847"],
+        ghostSpecs   = ["#00FF00", "#FF0000", "#FFAA00", "#6A5ACD"], // Virus (Green), Ransomware (Red), Worm (Yellow/Orange), Trojan (Blue/Purple)
         eatenCount   = 0,
         level        = 0,
         tick         = 0,
@@ -184,71 +184,15 @@ var PACMAN = (function () {
         // to account for the scaled sprite that extends beyond the block boundaries
         var blockY = Math.floor(pos.y/10);
         var blockX = Math.floor(pos.x/10);
-        var hasWall = false;
         
-        // First pass: fill all blocks with background color and check for walls
+        // Redraw a 3x3 grid of blocks around the player's position
         for (var dy = -1; dy <= 1; dy++) {
             for (var dx = -1; dx <= 1; dx++) {
                 var y = blockY + dy;
                 var x = blockX + dx;
                 // Make sure we're within map bounds
                 if (y >= 0 && y < map.height && x >= 0 && x < map.width) {
-                    var block = map.block({"y": y, "x": x});
-                    var blockX_px = x * map.blockSize;
-                    var blockY_px = y * map.blockSize;
-                    
-                    // Fill with background color to clear any sprite artifacts
-                    ctx.fillStyle = "#4A3A2A";
-                    ctx.fillRect(blockX_px, blockY_px, map.blockSize, map.blockSize);
-                    
-                    // Check if this is a wall block
-                    if (block === Pacman.WALL) {
-                        hasWall = true;
-                    }
-                }
-            }
-        }
-        
-        // If any wall blocks were affected, redraw all walls
-        if (hasWall) {
-            var i, j, p, line;
-            ctx.strokeStyle = "#808080";
-            ctx.lineWidth   = 5;
-            ctx.lineCap     = "round";
-            
-            for (i = 0; i < Pacman.WALLS.length; i += 1) {
-                line = Pacman.WALLS[i];
-                ctx.beginPath();
-
-                for (j = 0; j < line.length; j += 1) {
-                    p = line[j];
-                    
-                    if (p.move) {
-                        ctx.moveTo(p.move[0] * map.blockSize, p.move[1] * map.blockSize);
-                    } else if (p.line) {
-                        ctx.lineTo(p.line[0] * map.blockSize, p.line[1] * map.blockSize);
-                    } else if (p.curve) {
-                        ctx.quadraticCurveTo(p.curve[0] * map.blockSize, 
-                                             p.curve[1] * map.blockSize,
-                                             p.curve[2] * map.blockSize, 
-                                             p.curve[3] * map.blockSize);   
-                    }
-                }
-                ctx.stroke();
-            }
-        }
-        
-        // Second pass: redraw floor blocks (biscuits, empty spaces, etc.)
-        for (var dy = -1; dy <= 1; dy++) {
-            for (var dx = -1; dx <= 1; dx++) {
-                var y = blockY + dy;
-                var x = blockX + dx;
-                if (y >= 0 && y < map.height && x >= 0 && x < map.width) {
-                    var block = map.block({"y": y, "x": x});
-                    // Only redraw non-wall blocks
-                    if (block !== Pacman.WALL) {
-                        map.drawBlock(y, x, ctx);
-                    }
+                    map.drawBlock(y, x, ctx);
                 }
             }
         }
