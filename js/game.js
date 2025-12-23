@@ -184,6 +184,7 @@ var PACMAN = (function () {
         // to account for the scaled sprite that extends beyond the block boundaries
         var blockY = Math.floor(pos.y/10);
         var blockX = Math.floor(pos.x/10);
+        var hasWall = false;
         
         // Redraw a 3x3 grid of blocks around the player's position
         for (var dy = -1; dy <= 1; dy++) {
@@ -192,8 +193,43 @@ var PACMAN = (function () {
                 var x = blockX + dx;
                 // Make sure we're within map bounds
                 if (y >= 0 && y < map.height && x >= 0 && x < map.width) {
+                    // Check if this is a wall block before redrawing
+                    if (map.block({y: y, x: x}) === Pacman.WALL) {
+                        hasWall = true;
+                    }
                     map.drawBlock(y, x, ctx);
                 }
+            }
+        }
+        
+        // If any wall blocks were redrawn, we need to redraw the wall lines
+        // since filling wall blocks erases the wall lines
+        if (hasWall) {
+            // Redraw walls by drawing them again on top
+            var i, j, p, line;
+            ctx.strokeStyle = "#808080";
+            ctx.lineWidth   = 5;
+            ctx.lineCap     = "round";
+            
+            for (i = 0; i < Pacman.WALLS.length; i += 1) {
+                line = Pacman.WALLS[i];
+                ctx.beginPath();
+                
+                for (j = 0; j < line.length; j += 1) {
+                    p = line[j];
+                    
+                    if (p.move) {
+                        ctx.moveTo(p.move[0] * map.blockSize, p.move[1] * map.blockSize);
+                    } else if (p.line) {
+                        ctx.lineTo(p.line[0] * map.blockSize, p.line[1] * map.blockSize);
+                    } else if (p.curve) {
+                        ctx.quadraticCurveTo(p.curve[0] * map.blockSize, 
+                                             p.curve[1] * map.blockSize,
+                                             p.curve[2] * map.blockSize, 
+                                             p.curve[3] * map.blockSize);   
+                    }
+                }
+                ctx.stroke();
             }
         }
     }

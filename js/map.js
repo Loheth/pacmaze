@@ -148,6 +148,16 @@ Pacman.Map = function (size) {
 
         ctx.beginPath();
         
+        // Handle wall blocks - clear the area to remove any sprite pixels that overlapped
+        if (layout === Pacman.WALL) {
+            // Fill with background color to clear any overlapping sprite pixels
+            ctx.fillStyle = "#4A3A2A";
+            ctx.fillRect(blockX, blockY, blockSize, blockSize);
+            // Note: Wall lines are drawn globally, so we don't need to redraw them here
+            ctx.closePath();
+            return;
+        }
+        
         if (layout === Pacman.EMPTY || layout === Pacman.BLOCK || 
             layout === Pacman.BISCUIT) {
             
