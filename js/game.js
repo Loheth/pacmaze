@@ -150,27 +150,16 @@ var PACMAN = (function () {
         ctx.strokeText(scoreText, 15, textBase);
         ctx.fillText(scoreText, 15, textBase);
 
-        // Center: Lives icons only (no label)
+        // Center: Lives icons only (no label) - Cyber Agent sprites
         var livesCount = user.getLives();
         var livesSpacing = 30; // Increased spacing between icons
         var livesTotalWidth = livesCount * livesSpacing; // Width for all icons with spacing
         var livesStartX = (canvasWidth / 2) - (livesTotalWidth / 2);
         
         for (var i = 0, len = livesCount; i < len; i++) {
-            ctx.fillStyle = "#FFD700";
-            ctx.beginPath();
-            ctx.moveTo(livesStartX + (livesSpacing * i) + map.blockSize / 2,
-                       (topLeft+1) + map.blockSize / 2);
-            
-            ctx.arc(livesStartX + (livesSpacing * i) + map.blockSize / 2,
-                    (topLeft+1) + map.blockSize / 2,
-                    map.blockSize / 2, Math.PI * 0.25, Math.PI * 1.75, false);
-            ctx.fill();
-            
-            // Add outline
-            ctx.strokeStyle = "#8B6914";
-            ctx.lineWidth = 1;
-            ctx.stroke();
+            var iconX = livesStartX + (livesSpacing * i) + map.blockSize / 2;
+            var iconY = (topLeft+1) + map.blockSize / 2;
+            user.drawCyberAgentAt(ctx, iconX, iconY, map.blockSize, RIGHT);
         }
 
         // Right side: Level (zero-padded)
@@ -189,6 +178,25 @@ var PACMAN = (function () {
         map.drawBlock(Math.floor(pos.y/10), Math.floor(pos.x/10), ctx);
         map.drawBlock(Math.ceil(pos.y/10), Math.ceil(pos.x/10), ctx);
     }
+    
+    function redrawPlayerBlock(pos) {
+        // Redraw a larger area (3x3 blocks) around the player position
+        // to account for the scaled sprite that extends beyond the block boundaries
+        var blockY = Math.floor(pos.y/10);
+        var blockX = Math.floor(pos.x/10);
+        
+        // Redraw a 3x3 grid of blocks around the player's position
+        for (var dy = -1; dy <= 1; dy++) {
+            for (var dx = -1; dx <= 1; dx++) {
+                var y = blockY + dy;
+                var x = blockX + dx;
+                // Make sure we're within map bounds
+                if (y >= 0 && y < map.height && x >= 0 && x < map.width) {
+                    map.drawBlock(y, x, ctx);
+                }
+            }
+        }
+    }
 
     function mainDraw() { 
 
@@ -204,7 +212,7 @@ var PACMAN = (function () {
         for (i = 0, len = ghosts.length; i < len; i += 1) {
             redrawBlock(ghostPos[i].old);
         }
-        redrawBlock(u.old);
+        redrawPlayerBlock(u.old);
         
         for (i = 0, len = ghosts.length; i < len; i += 1) {
             ghosts[i].draw(ctx);
@@ -257,7 +265,7 @@ var PACMAN = (function () {
             if (tick - timerStart > (Pacman.FPS * 2)) { 
                 loseLife();
             } else { 
-                redrawBlock(userPos);
+                redrawPlayerBlock(userPos);
                 for (i = 0, len = ghosts.length; i < len; i += 1) {
                     redrawBlock(ghostPos[i].old);
                     ghostPos.push(ghosts[i].draw(ctx));
@@ -337,7 +345,7 @@ var PACMAN = (function () {
         user  = new Pacman.User({ 
             "completedLevel" : completedLevel, 
             "eatenPill"      : eatenPill 
-        }, map);
+        }, map, root);
 
         for (i = 0, len = ghostSpecs.length; i < len; i += 1) {
             ghost = new Pacman.Ghost({"getTick":getTick}, map, ghostSpecs[i]);
