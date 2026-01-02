@@ -19,7 +19,8 @@ var PACMAN = (function () {
         virusMessageTimer = null,
         ransomwareMessageTimer = null,
         wormMessageTimer = null,
-        trojanMessageTimer = null;
+        trojanMessageTimer = null,
+        powerupMessageTimer = null;
 
     function getTick() { 
         return tick;
@@ -95,6 +96,33 @@ var PACMAN = (function () {
         var width = ctx.measureText(text).width,
             x     = ((map.width * map.blockSize) - width) / 2,
             y     = (map.height * map.blockSize) / 2;
+        ctx.strokeText(text, x, y);
+        ctx.fillText(text, x, y);
+    }
+
+    function drawPowerupMessage() {
+        var text = "INSTALLED FIREWALL";
+        
+        // Use smaller font size to ensure text fits in maze
+        var fontSize = 18;
+        ctx.font = "bold " + fontSize + "px 'Press Start 2P', monospace";
+        
+        // Measure text width and adjust if too wide
+        var maxWidth = (map.width * map.blockSize) * 0.9; // 90% of canvas width
+        var textWidth = ctx.measureText(text).width;
+        
+        // If text is too wide, reduce font size
+        if (textWidth > maxWidth) {
+            fontSize = Math.floor(fontSize * (maxWidth / textWidth));
+            ctx.font = "bold " + fontSize + "px 'Press Start 2P', monospace";
+            textWidth = ctx.measureText(text).width;
+        }
+        
+        ctx.fillStyle = "#00FF00"; // Green color for positive powerup
+        ctx.strokeStyle = "#000000";
+        ctx.lineWidth = 3;
+        var x = ((map.width * map.blockSize) - textWidth) / 2,
+            y = (map.height * map.blockSize) / 2;
         ctx.strokeText(text, x, y);
         ctx.fillText(text, x, y);
     }
@@ -706,6 +734,189 @@ var PACMAN = (function () {
                 }
             }
         }
+
+        // Show powerup message for 2 seconds (flashing effect)
+        // Always check timer and clear it after 2 seconds, regardless of state
+        if (powerupMessageTimer !== null) {
+            var elapsed = tick - powerupMessageTimer;
+            // Check if 2 seconds have passed (60 frames at 30 FPS = 2 seconds)
+            var twoSecondsInFrames = Pacman.FPS * 2;
+            if (elapsed >= twoSecondsInFrames) {
+                // Time's up - always clear the timer after exactly 2 seconds
+                var wasShowing = (state === PLAYING);
+                powerupMessageTimer = null;
+                // If we were showing the message, force a complete redraw of the message area
+                // to ensure no text marks remain
+                if (wasShowing && state === PLAYING) {
+                    // Calculate the exact pixel area where text was displayed
+                    var text = "INSTALLED FIREWALL";
+                    ctx.font = "bold 18px 'Press Start 2P', monospace";
+                    var textWidth = ctx.measureText(text).width;
+                    var textX = ((map.width * map.blockSize) - textWidth) / 2;
+                    var textY = (map.height * map.blockSize) / 2;
+                    var textHeight = 25; // Approximate text height including stroke
+                    
+                    // First, explicitly clear the text area by filling with background color
+                    // Add padding to account for stroke width and anti-aliasing
+                    var clearPadding = 10;
+                    ctx.fillStyle = "#4A3A2A"; // Main background color
+                    ctx.fillRect(
+                        textX - clearPadding, 
+                        textY - textHeight - clearPadding, 
+                        textWidth + (clearPadding * 2), 
+                        textHeight + (clearPadding * 2)
+                    );
+                    
+                    // Now redraw the center area where message was displayed
+                    var centerY = Math.floor((map.height * map.blockSize) / 2 / map.blockSize);
+                    var centerX = Math.floor((map.width * map.blockSize) / 2 / map.blockSize);
+                    var hasWall = false;
+                    
+                    // Redraw blocks in message area (wider area to cover text)
+                    for (var dy = -4; dy <= 4; dy++) {
+                        for (var dx = -10; dx <= 10; dx++) {
+                            var y = centerY + dy;
+                            var x = centerX + dx;
+                            if (y >= 0 && y < map.height && x >= 0 && x < map.width) {
+                                if (map.block({y: y, x: x}) === Pacman.WALL) {
+                                    hasWall = true;
+                                }
+                                map.drawBlock(y, x, ctx);
+                            }
+                        }
+                    }
+                    
+                    // If any wall blocks were redrawn, redraw wall lines
+                    if (hasWall) {
+                        var i, j, p, line;
+                        ctx.strokeStyle = "#808080";
+                        ctx.lineWidth   = 5;
+                        ctx.lineCap     = "round";
+                        
+                        for (i = 0; i < Pacman.WALLS.length; i += 1) {
+                            line = Pacman.WALLS[i];
+                            ctx.beginPath();
+                            
+                            for (j = 0; j < line.length; j += 1) {
+                                p = line[j];
+                                
+                                if (p.move) {
+                                    ctx.moveTo(p.move[0] * map.blockSize, p.move[1] * map.blockSize);
+                                } else if (p.line) {
+                                    ctx.lineTo(p.line[0] * map.blockSize, p.line[1] * map.blockSize);
+                                } else if (p.curve) {
+                                    ctx.quadraticCurveTo(p.curve[0] * map.blockSize, 
+                                                         p.curve[1] * map.blockSize,
+                                                         p.curve[2] * map.blockSize, 
+                                                         p.curve[3] * map.blockSize);   
+                                }
+                            }
+                            ctx.stroke();
+                        }
+                    }
+                    
+                    // Redraw pills in the message area
+                    map.drawPills(ctx);
+                    
+                    // Redraw any sprites that might be in this area
+                    if (userPos) {
+                        var userBlockY = Math.floor(userPos.y / 10);
+                        var userBlockX = Math.floor(userPos.x / 10);
+                        if (Math.abs(userBlockY - centerY) <= 4 && Math.abs(userBlockX - centerX) <= 10) {
+                            user.draw(ctx);
+                        }
+                    }
+                    // Redraw ghosts in this area
+                    for (var i = 0, len = ghosts.length; i < len; i += 1) {
+                        if (ghostPos && ghostPos[i] && ghostPos[i]["new"]) {
+                            var ghostBlockY = Math.floor(ghostPos[i]["new"].y / 10);
+                            var ghostBlockX = Math.floor(ghostPos[i]["new"].x / 10);
+                            if (Math.abs(ghostBlockY - centerY) <= 4 && Math.abs(ghostBlockX - centerX) <= 10) {
+                                ghosts[i].draw(ctx);
+                            }
+                        }
+                    }
+                }
+            } else if (state === PLAYING) {
+                // Only draw message during PLAYING state and when timer is active
+                // Flash effect: show message every other frame for first second
+                if (elapsed < Pacman.FPS) {
+                    // Flash every 3 frames for first second (on for 3 frames, off for 3 frames)
+                    if ((elapsed % 6) < 3) {
+                        drawPowerupMessage();
+                    } else {
+                        // Clear text area when not flashing to prevent green spots
+                        var text = "INSTALLED FIREWALL";
+                        ctx.font = "bold 18px 'Press Start 2P', monospace";
+                        var textWidth = ctx.measureText(text).width;
+                        var textX = ((map.width * map.blockSize) - textWidth) / 2;
+                        var textY = (map.height * map.blockSize) / 2;
+                        var textHeight = 25;
+                        var clearPadding = 10;
+                        
+                        // Clear the text area
+                        ctx.fillStyle = "#4A3A2A";
+                        ctx.fillRect(
+                            textX - clearPadding, 
+                            textY - textHeight - clearPadding, 
+                            textWidth + (clearPadding * 2), 
+                            textHeight + (clearPadding * 2)
+                        );
+                        
+                        // Redraw blocks in the cleared area
+                        var centerY = Math.floor((map.height * map.blockSize) / 2 / map.blockSize);
+                        var centerX = Math.floor((map.width * map.blockSize) / 2 / map.blockSize);
+                        var hasWall = false;
+                        for (var dy = -2; dy <= 2; dy++) {
+                            for (var dx = -6; dx <= 6; dx++) {
+                                var y = centerY + dy;
+                                var x = centerX + dx;
+                                if (y >= 0 && y < map.height && x >= 0 && x < map.width) {
+                                    if (map.block({y: y, x: x}) === Pacman.WALL) {
+                                        hasWall = true;
+                                    }
+                                    map.drawBlock(y, x, ctx);
+                                }
+                            }
+                        }
+                        
+                        // If any wall blocks were redrawn, redraw wall lines to prevent blinking
+                        if (hasWall) {
+                            var i, j, p, line;
+                            ctx.strokeStyle = "#808080";
+                            ctx.lineWidth   = 5;
+                            ctx.lineCap     = "round";
+                            
+                            for (i = 0; i < Pacman.WALLS.length; i += 1) {
+                                line = Pacman.WALLS[i];
+                                ctx.beginPath();
+                                
+                                for (j = 0; j < line.length; j += 1) {
+                                    p = line[j];
+                                    
+                                    if (p.move) {
+                                        ctx.moveTo(p.move[0] * map.blockSize, p.move[1] * map.blockSize);
+                                    } else if (p.line) {
+                                        ctx.lineTo(p.line[0] * map.blockSize, p.line[1] * map.blockSize);
+                                    } else if (p.curve) {
+                                        ctx.quadraticCurveTo(p.curve[0] * map.blockSize, 
+                                                             p.curve[1] * map.blockSize,
+                                                             p.curve[2] * map.blockSize, 
+                                                             p.curve[3] * map.blockSize);   
+                                    }
+                                }
+                                ctx.stroke();
+                            }
+                        }
+                        
+                        map.drawPills(ctx);
+                    }
+                } else {
+                    // Show continuously for second second
+                    drawPowerupMessage();
+                }
+            }
+        }
     }
 
     function eatenPill() {
@@ -714,7 +925,9 @@ var PACMAN = (function () {
         eatenCount = 0;
         for (i = 0; i < ghosts.length; i += 1) {
             ghosts[i].makeEatable(ctx);
-        }        
+        }
+        // Show powerup message
+        powerupMessageTimer = tick;
     };
     
     function completedLevel() {

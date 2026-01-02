@@ -1,44 +1,4 @@
-# 🎮 Malware Mayhem
-
-A cybersecurity-themed Pac-Man style game where you navigate through a maze while avoiding different types of malware threats. Collect points, avoid the cyber threats, and compete for the highest score!
-
-![Malware Mayhem](images/Gemini_Generated_Image_pmiy2lpmiy2lpmiy.png)
-
-## 🎯 Game Overview
-
-**Malware Mayhem** is an arcade-style browser game that combines classic Pac-Man gameplay with a cybersecurity theme. Navigate through the maze, collect points, and avoid the various malware enemies that will deduct points from your score!
-
-## 🚀 Features
-
-- **Classic Arcade Gameplay**: Navigate through mazes using arrow keys
-- **Four Types of Malware Enemies**:
-  - 🦠 **Virus** (Green): -50 points
-  - 🔒 **Ransomware** (Red): -100 points
-  - 🐛 **Worm** (Yellow/Orange): -200 points
-  - 🐴 **Trojan** (Blue/Purple): -300 points
-- **Score System**: Collect points and compete for high scores
-- **Leaderboard**: Save and view your best scores
-- **Sound Effects**: Immersive audio experience with mute toggle
-- **Retro Styling**: Pixel-perfect graphics with retro game aesthetics
-
-## 🎮 How to Play
-
-1. **Start the Game**: Click the "PLAY" button on the start screen
-2. **Movement**: Use arrow keys (↑ ↓ ← →) to navigate through the maze
-3. **Objective**: Collect all the dots while avoiding the malware enemies
-4. **Scoring**: 
-   - Collect dots to increase your score
-   - Avoid malware enemies to prevent point deductions
-   - Each malware type deducts different amounts of points
-5. **Sound Control**: Press `S` or click the mute button to toggle sound
-6. **Game Over**: When you lose all lives, enter your name to submit your score to the leaderboard
-
-## 🛠️ Installation
-
-### Prerequisites
-
-- A modern web browser (Chrome, Firefox, Safari, or Edge)
-- No additional dependencies required!
+ # 🎮 Malware Mayhem
 
 ### Setup
 
@@ -105,3 +65,4 @@ pacmaze/
 - **Malware Penalties**: Different malware types deduct different point values
 - **Power-ups**: Special items may appear throughout the game
 - **Levels**: Progress through increasingly difficult levels
+
