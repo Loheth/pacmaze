@@ -194,3 +194,5 @@ Pacman.Map = function (size) {
     };
 };
 
+// Updated.
+

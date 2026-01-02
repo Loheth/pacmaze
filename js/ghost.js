@@ -315,3 +315,5 @@ Pacman.Ghost = function (game, map, colour) {
     };
 };
 
+// Updated.
+

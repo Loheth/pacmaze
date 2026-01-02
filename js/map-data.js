@@ -128,3 +128,5 @@ Pacman.WALLS = [
      {"line": [10.5, 9.5]}]
 ];
 
+// Updated.
+

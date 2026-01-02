@@ -436,3 +436,5 @@ Pacman.User = function (game, map, rootPath) {
     };
 };
 
+// Updated.
+

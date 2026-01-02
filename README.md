@@ -64,5 +64,5 @@ pacmaze/
 - **Scoring**: Points are awarded for collecting dots
 - **Malware Penalties**: Different malware types deduct different point values
 - **Power-ups**: Special items may appear throughout the game
-- **Levels**: Progress through increasingly difficult levels
+- **Levels**: Progress through increasingly difficult levels.
 
